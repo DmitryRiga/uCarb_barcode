@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@latest"></script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PWA Barcode Scanner</title>
@@ -11,7 +12,9 @@
 <body>
   <h1>Barcode Scanner</h1>
   <video id="video" width="320" height="240" autoplay></video>
-  <button id="startButton">Start Scanning</button>
+  <button id="takePictureButton">Take Picture</button>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <img id="capturedImage" alt="Captured Image">
   <p id="barcodeResult"></p>
 </body>
 </html>

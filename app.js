@@ -6,42 +6,43 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-document.getElementById('startButton').addEventListener('click', () => {
-  const video = document.getElementById('video');
-  const barcodeResult = document.getElementById('barcodeResult');
+document.getElementById('takePictureButton').addEventListener('click', takePicture);
 
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(stream => {
-    video.srcObject = stream;
-  }).catch(err => {
-    console.error(err);
-  });
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const img = document.getElementById('capturedImage');
+const barcodeResult = document.getElementById('barcodeResult');
 
-  video.addEventListener('play', () => {
-    const barcodeCanvas = document.createElement('canvas');
-    const barcodeContext = barcodeCanvas.getContext('2d');
-
-    setInterval(() => {
-      barcodeCanvas.width = video.videoWidth;
-      barcodeCanvas.height = video.videoHeight;
-      barcodeContext.drawImage(video, 0, 0, barcodeCanvas.width, barcodeCanvas.height);
-
-      const imageData = barcodeContext.getImageData(0, 0, barcodeCanvas.width, barcodeCanvas.height);
-
-      // Use a barcode library like QuaggaJS to detect the barcode
-      Quagga.decodeSingle({
-        src: imageData,
-        numOfWorkers: 0,  // Needs to be 0 when used within a browser
-        inputStream: {
-          size: 800  // restrict input-size to be 800px in width (long-side)
-        },
-        decoder: {
-          readers: ["code_128_reader"]  // List of active readers
-        }
-      }, function (result) {
-        if (result && result.codeResult) {
-          barcodeResult.textContent = result.codeResult.code;
-        }
-      });
-    }, 1000);
-  });
+navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(stream => {
+  video.srcObject = stream;
+}).catch(err => {
+  console.error(err);
 });
+
+function takePicture() {
+  const context = canvas.getContext('2d');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = canvas.toDataURL('image/png');
+  img.src = imageData;
+  img.style.display = 'block';
+
+  // Decode the barcode from the captured image
+  Quagga.decodeSingle({
+    src: imageData,
+    numOfWorkers: 0,
+    inputStream: {
+      size: 800 // restrict input-size to be 800px in width (long-side)
+    },
+    decoder: {
+      readers: ["code_128_reader"] // List of active readers
+    }
+  }, function (result) {
+    if (result && result.codeResult) {
+      barcodeResult.textContent = result.codeResult.code;
+    } else {
+      barcodeResult.textContent = "No barcode detected.";
+    }
+  });
+}
