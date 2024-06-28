@@ -13,12 +13,14 @@ const canvas = document.getElementById('canvas');
 const img = document.getElementById('capturedImage');
 const barcodeResult = document.getElementById('barcodeResult');
 
+// Access the device camera and stream to video element
 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(stream => {
   video.srcObject = stream;
 }).catch(err => {
   console.error(err);
 });
 
+// Capture a picture and process the image to read the barcode
 function takePicture() {
   const context = canvas.getContext('2d');
   canvas.width = video.videoWidth;
@@ -31,7 +33,7 @@ function takePicture() {
   // Decode the barcode from the captured image
   Quagga.decodeSingle({
     src: imageData,
-    numOfWorkers: 0,
+    numOfWorkers: 0, // Needs to be 0 when used within a browser
     inputStream: {
       size: 800 // restrict input-size to be 800px in width (long-side)
     },
