@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="ZXing for JS">
-  <title>1.1 uCarb</title>
+  <title>ZXing TypeScript | Decoding from camera stream</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.0/normalize.css">
   <link rel="stylesheet" href="https://unpkg.com/milligram@1.3.0/dist/milligram.min.css">
@@ -38,8 +38,8 @@
   <script type="text/javascript">
     window.addEventListener('load', function () {
       let selectedDeviceId;
-      const codeReader = new ZXing.BrowserMultiFormatReader()
-      console.log('ZXing code reader initialized')
+      const codeReader = new ZXing.BrowserMultiFormatReader();
+      console.log('ZXing code reader initialized');
       codeReader.listVideoInputDevices()
         .then((videoInputDevices) => {
           selectedDeviceId = videoInputDevices[0].deviceId;
@@ -47,37 +47,37 @@
           const startVideoStream = () => {
             codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
               if (result) {
-                console.log(result)
-                document.getElementById('result').textContent = result.text
-                codeReader.reset()
-                fetchProductInfo(result.text)
+                console.log(result);
+                document.getElementById('result').textContent = result.text;
+                codeReader.reset();
+                fetchProductInfo(result.text);
               }
               if (err && !(err instanceof ZXing.NotFoundException)) {
-                console.error(err)
-                document.getElementById('result').textContent = err
+                console.error(err);
+                document.getElementById('result').textContent = err;
               }
-            })
-            console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
-          }
+            });
+            console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
+          };
 
           startVideoStream();
 
-          document.getElementById('startButton').addEventListener('click', startVideoStream)
+          document.getElementById('startButton').addEventListener('click', startVideoStream);
 
           document.getElementById('stopButton').addEventListener('click', () => {
-            codeReader.reset()
+            codeReader.reset();
             document.getElementById('result').textContent = '';
             document.getElementById('product-info').innerHTML = '';
-            console.log('Stopped.')
-          })
+            console.log('Stopped.');
+          });
         })
         .catch((err) => {
-          console.error(err)
-        })
-    })
+          console.error(err);
+        });
+    });
 
     function fetchProductInfo(result) {
-      const productId = result.match(/\d+/)[0];  // Extract numbers from result
+      const productId = result.match(/\d+/)[0]; // Extract numbers from result
       const url = `https://world.openfoodfacts.org/api/v3/product/${productId}.json`;
 
       fetch(url)
@@ -87,17 +87,20 @@
             const product = data.product;
             const productName = product.product_name;
             const productImage = product.selected_images?.front?.display?.en;
-            const carbohydrates = product.nutriments?.carbohydrates_100g;
-            const energy = product.nutriments?.['energy-kcal_100g'];
-            const sugars = product.nutriments?.sugars_100g;
+            const carbohydrates = product.nutriments?.carbohydrates_100g || 'N/A';
+            const energy = product.nutriments?.['energy-kcal_100g'] || 'N/A';
+            const sugars = product.nutriments?.sugars_100g || 'N/A';
+            const estCarbohydrates = product.nutriments_estimated?.carbohydrates_100g || 'N/A';
+            const estEnergy = product.nutriments_estimated?.['energy-kcal_100g'] || 'N/A';
+            const estSugars = product.nutriments_estimated?.sugars_100g || 'N/A';
 
             document.getElementById('product-info').innerHTML = `
               <h2>Product Information</h2>
               <p><strong>Name:</strong> ${productName}</p>
               <p><img src="${productImage}" alt="${productName}"></p>
-              <p><strong>Carbohydrates (100g):</strong> ${carbohydrates}</p>
-              <p><strong>Energy (kcal/100g):</strong> ${energy}</p>
-              <p><strong>Sugars (100g):</strong> ${sugars}</p>
+              <p><strong>Carbohydrates (100g):</strong> ${carbohydrates} or ${estCarbohydrates}</p>
+              <p><strong>Energy (kcal/100g):</strong> ${energy} or ${estEnergy}</p>
+              <p><strong>Sugars (100g):</strong> ${sugars} or ${estSugars}</p>
             `;
           } else {
             document.getElementById('product-info').innerHTML = '<p>Product information not found.</p>';
