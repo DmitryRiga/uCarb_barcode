@@ -5,10 +5,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="ZXing for JS">
-  <title>uCarb scanner</title>
+  <title>ZXing TypeScript | Decoding from camera stream</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.0/normalize.css">
   <link rel="stylesheet" href="https://unpkg.com/milligram@1.3.0/dist/milligram.min.css">
+  <style>
+    #video {
+      width: 100%;
+      height: auto;
+      border: 1px solid gray;
+    }
+  </style>
 </head>
 
 <body>
@@ -16,9 +23,10 @@
     <section class="container" id="demo-content">
       <div>
         <a class="button" id="startButton">Start</a>
+        <a class="button" id="stopButton">Stop</a>
       </div>
       <div>
-        <video id="video" width="300" height="200" style="border: 1px solid gray"></video>
+        <video id="video"></video>
       </div>
       <label>Result:</label>
       <pre><code id="result"></code></pre>
@@ -46,6 +54,12 @@
               }
             })
             console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
+          })
+
+          document.getElementById('stopButton').addEventListener('click', () => {
+            codeReader.reset()
+            document.getElementById('result').textContent = '';
+            console.log('Stopped.')
           })
         })
         .catch((err) => {
