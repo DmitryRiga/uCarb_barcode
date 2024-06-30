@@ -22,6 +22,7 @@
   <main class="wrapper" style="padding-top:2em">
     <section class="container" id="demo-content">
       <div>
+        <a class="button" id="startButton">Start</a>
         <a class="button" id="stopButton">Stop</a>
       </div>
       <div>
@@ -41,17 +42,19 @@
       codeReader.listVideoInputDevices()
         .then((videoInputDevices) => {
           selectedDeviceId = videoInputDevices[0].deviceId;
-          codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-            if (result) {
-              console.log(result)
-              document.getElementById('result').textContent = result.text
-            }
-            if (err && !(err instanceof ZXing.NotFoundException)) {
-              console.error(err)
-              document.getElementById('result').textContent = err
-            }
+          document.getElementById('startButton').addEventListener('click', () => {
+            codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+              if (result) {
+                console.log(result)
+                document.getElementById('result').textContent = result.text
+              }
+              if (err && !(err instanceof ZXing.NotFoundException)) {
+                console.error(err)
+                document.getElementById('result').textContent = err
+              }
+            })
+            console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
           })
-          console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
 
           document.getElementById('stopButton').addEventListener('click', () => {
             codeReader.reset()
