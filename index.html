@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="ZXing for JS">
-  <title>ZXing TypeScript | Decoding from camera stream</title>
+  <title>uCarb 1.2</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.0/normalize.css">
   <link rel="stylesheet" href="https://unpkg.com/milligram@1.3.0/dist/milligram.min.css">
@@ -86,21 +86,23 @@
           if (data && data.product) {
             const product = data.product;
             const productName = product.product_name;
-            const productImage = product.selected_images?.front?.display?.en;
-            const carbohydrates = product.nutriments?.carbohydrates_100g || 'N/A';
-            const energy = product.nutriments?.['energy-kcal_100g'] || 'N/A';
-            const sugars = product.nutriments?.sugars_100g || 'N/A';
-            const estCarbohydrates = product.nutriments_estimated?.carbohydrates_100g || 'N/A';
-            const estEnergy = product.nutriments_estimated?.['energy-kcal_100g'] || 'N/A';
-            const estSugars = product.nutriments_estimated?.sugars_100g || 'N/A';
+            let productImage = product.selected_images?.front?.display?.en;
+            if (!productImage) {
+              const images = product.selected_images?.front?.display;
+              productImage = images ? Object.values(images)[0] : '';
+            }
+
+            const carbohydrates = formatValue(product.nutriments?.carbohydrates_100g, product.nutriments_estimated?.carbohydrates_100g);
+            const energy = formatValue(product.nutriments?.['energy-kcal_100g'], product.nutriments_estimated?.['energy-kcal_100g']);
+            const sugars = formatValue(product.nutriments?.sugars_100g, product.nutriments_estimated?.sugars_100g);
 
             document.getElementById('product-info').innerHTML = `
               <h2>Product Information</h2>
               <p><strong>Name:</strong> ${productName}</p>
               <p><img src="${productImage}" alt="${productName}"></p>
-              <p><strong>Carbohydrates (100g):</strong> ${carbohydrates} or ${estCarbohydrates}</p>
-              <p><strong>Energy (kcal/100g):</strong> ${energy} or ${estEnergy}</p>
-              <p><strong>Sugars (100g):</strong> ${sugars} or ${estSugars}</p>
+              <p><strong>Carbohydrates (100g):</strong> ${carbohydrates}</p>
+              <p><strong>Energy (kcal/100g):</strong> ${energy}</p>
+              <p><strong>Sugars (100g):</strong> ${sugars}</p>
             `;
           } else {
             document.getElementById('product-info').innerHTML = '<p>Product information not found.</p>';
@@ -110,6 +112,13 @@
           console.error('Error fetching product information:', err);
           document.getElementById('product-info').innerHTML = '<p>Error fetching product information.</p>';
         });
+    }
+
+    function formatValue(actual, estimated) {
+      if (actual && estimated) {
+        return `${actual} or ${estimated}`;
+      }
+      return actual || estimated || '';
     }
   </script>
 </body>
